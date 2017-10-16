@@ -48,7 +48,7 @@ def post_root_word(post_id, word, definition):
 			post_root_word(post_root_word.comment_id, root_word, new_definition)
 post_root_word.comment_id = None
 
-def main():
+def make_post(event, context):
 	table = resource("dynamodb").Table("WordpostBotPosts")
 
 	# Get a random word that has not been posted yet
@@ -56,7 +56,6 @@ def main():
 		word = get_wordnik_json("words.json/randomWord")["word"]
 		if "Item" not in table.get_item(Key={"word": word}):
 			break
-	return word
 
 	# Make a post, insert its data into the database, and log it
 	post_id, definition = post_word(environ["wpb_id"]+"/feed", word)
@@ -65,9 +64,3 @@ def main():
 	# If the posted word references a root word, post the 
 	# definition of the root word as a comment
 	post_root_word(post_id, word, definition)
-
-if __name__ == "__main__":
-	try:
-		print main()
-	except Exception as e:
-		print str(e)
