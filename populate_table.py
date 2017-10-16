@@ -10,7 +10,7 @@ def connect_to_database():
         "passwd": db_info["password"],
         "db": db_info["db"],
         "cursorclass" : DictCursor,
-	"charset": "utf8"
+		"charset": "utf8"
     }
     db = connect(**options)
     db.autocommit(True)
