@@ -57,7 +57,7 @@ def make_post(event, context):
 		if "Item" not in table.get_item(Key={"word": word}):
 			break
 
-	# Make a post, insert its data into the database, and log it
+	# Make a post and insert its data into the database
 	post_id, definition = post_word(environ["wpb_id"]+"/feed", word)
 	table.put_item(Item={"word": word, "id": post_id, "reactions": None})
 
