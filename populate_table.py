@@ -9,7 +9,8 @@ def connect_to_database():
         "user": db_info["user"],
         "passwd": db_info["password"],
         "db": db_info["db"],
-        "cursorclass" : DictCursor
+        "cursorclass" : DictCursor,
+	"charset": "utf8"
     }
     db = connect(**options)
     db.autocommit(True)
@@ -25,5 +26,6 @@ def execute_query(query, params=None):
 
 table = resource("dynamodb").Table("WordpostBotPosts")
 
-for post in execute_query("select word from Posts"):
+for post in execute_query("select word, id from Posts"):
+	print post["word"]
 	table.put_item(Item={"word": post["word"], "id": post["id"], "reactions": None})
