@@ -16,7 +16,7 @@ def connect_to_database():
     return db
 db = connect_to_database()
 
-def execute_query(query, params=None):
+def execute_query(query):
     cursor = db.cursor()
     cursor.execute(query, params)
     query_results = cursor.fetchall()
