@@ -1,21 +1,24 @@
 from requests import Session
-from os import environ
 from re import match
 from boto3 import resource
+
+dynamodb = resource("dynamodb")
+info_table = dynamodb.Table("WordpostBotInfo")
+credentials = info_table.get_item(Key={"resource": "credentials"})["Item"]
 
 def get_wordnik_json(route):
 	r = get_wordnik_json.session.get("https://api.wordnik.com/v4/"+route)
 	r.raise_for_status()
 	return r.json()
 get_wordnik_json.session = Session()
-get_wordnik_json.session.params = {"limit": 1, "minLength": 0, "api_key": environ["wordnik_key"]}
+get_wordnik_json.session.params = {"limit": 1, "minLength": 0, "api_key": credentials["wordnik_key"]}
 
 def post_to_page(route, message):
 	r = post_to_page.session.post("https://graph.facebook.com/v2.10/"+route, data={"message": message})
 	r.raise_for_status()
 	return r.json()["id"]
 post_to_page.session = Session()
-post_to_page.session.params = {"access_token": environ["wpb_access_token"]}
+post_to_page.session.params = {"access_token": credentials["access_token"]}
 
 def post_word(route, word):
 	word_info = get_wordnik_json("word.json/"+word+"/definitions")[0]
@@ -49,17 +52,17 @@ def post_root_word(post_id, word, definition):
 post_root_word.comment_id = None
 
 def make_post(event, context):
-	table = resource("dynamodb").Table("WordpostBotPosts")
+	posts = dynamodb.Table("WordpostBotPosts")
 
 	# Get a random word that has not been posted yet
 	while True:
 		word = get_wordnik_json("words.json/randomWord")["word"]
-		if "Item" not in table.get_item(Key={"word": word}):
+		if "Item" not in posts.get_item(Key={"word": word}):
 			break
 
 	# Make a post and insert its data into the database
-	post_id, definition = post_word(environ["wpb_id"]+"/feed", word)
-	table.put_item(Item={"word": word, "id": post_id, "reactions": None})
+	post_id, definition = post_word(credentials["page_id"]+"/feed", word)
+	posts.put_item(Item={"word": word, "id": post_id, "reactions": None})
 
 	# If the posted word references a root word, post the 
 	# definition of the root word as a comment
