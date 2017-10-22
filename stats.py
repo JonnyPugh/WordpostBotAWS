@@ -65,11 +65,14 @@ class Stats(object):
 
 	def __calculate_stats(self):
 		self.__ids_to_process.join()
-		self.__top_posts = sorted([(post_id, reactions) for post_id, reactions in self.__posts.items()], key=lambda x: x[1], reverse=True)
-		self.__top_reactors = []
-		for reactor_info in sorted([(user_id, reactions) for user_id, reactions in self.__user_reactions.items()], key=lambda x: x[1], reverse=True):
-			user_id = reactor_info[0]
-			self.__top_reactors.append({"id": user_id, "name": self.__user_names[user_id], "reactions": self.__users[user_id]})
+		try: 
+			self.__top_posts
+		except AttributeError:
+			self.__top_posts = sorted([(post_id, reactions) for post_id, reactions in self.__posts.items()], key=lambda x: x[1], reverse=True)
+			self.__top_reactors = []
+			for reactor_info in sorted([(user_id, reactions) for user_id, reactions in self.__user_reactions.items()], key=lambda x: x[1], reverse=True):
+				user_id = reactor_info[0]
+				self.__top_reactors.append({"id": user_id, "name": self.__user_names[user_id], "reactions": self.__users[user_id]})
 
 	def get_top_posts(self, num_posts=100):
 		self.__calculate_stats()
