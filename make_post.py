@@ -62,7 +62,7 @@ def make_post(event, context):
 
 	# Make a post and insert its data into the database
 	post_id, definition = post_word(credentials["page_id"]+"/feed", word)
-	posts.put_item(Item={"word": word, "id": post_id, "reactions": None})
+	posts.put_item(Item={"word": word, "id": post_id, "reactions": False})
 
 	# If the posted word references a root word, post the 
 	# definition of the root word as a comment
