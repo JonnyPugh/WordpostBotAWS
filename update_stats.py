@@ -4,9 +4,8 @@ from stats import Stats
 from boto3 import client, resource
 
 def update(event, context):
-	paginator = client("dynamodb").get_paginator("scan")
-
 	posts = []
+	paginator = client("dynamodb").get_paginator("scan")
 	for page in paginator.paginate(TableName="WordpostBotPosts", FilterExpression="reactions = :t", ExpressionAttributeValues={":t": {"BOOL": False}}):
 	    for item in page["Items"]:
 	    	item["word"] = item["word"]["S"]
