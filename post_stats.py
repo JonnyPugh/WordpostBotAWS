@@ -2,7 +2,7 @@
 
 from stats import Stats
 from boto3 import client, resource
-from requests import post
+from requests import Session
 
 def make_post(event, context):
 	posts = []
@@ -16,4 +16,10 @@ def make_post(event, context):
 	access_token = credentials["access_token"]
 	stats_item = info_table.get_item(Key={"resource": "stats"})["Item"]
 	stats = Stats(access_token, posts, stats_item["top_reactors"], stats_item["top_posts"], stats_item["total_posts"], stats_item["total_reactions"])
-	post("https://graph.facebook.com/v2.10/"+credentials["page_id"]+"/feed", params={"access_token": access_token}, data={"message": stats.get_top_reactor_message()}).raise_for_status()
+	session = Session()
+	session.params = {"access_token": credentials["access_token"]}
+	api_url = "https://graph.facebook.com/v2.10/"
+	r = session.post(api_url+credentials["page_id"]+"/feed", data={"message": stats.get_top_reactor_message()})
+	r.raise_for_status()
+	post_id = r.json()["id"]
+	session.post(api_url+post_id+"/comments", data={"message": stats.get_top_post_message()}).raise_for_status()
